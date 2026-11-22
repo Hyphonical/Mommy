@@ -10,16 +10,16 @@ pub(crate) struct Config {
 
 #[derive(Debug, Deserialize, Clone)]
 pub(crate) struct Persona {
-    #[serde(default = "default_char")]
-    pub(crate) char: String,
-    #[serde(default = "default_user")]
-    pub(crate) user: String,
-    #[serde(default = "default_them")]
-    pub(crate) them: String,
-    #[serde(default = "default_their")]
-    pub(crate) their: String,
-    #[serde(default = "default_self")]
-    pub(crate) self_ref: String,
+    #[serde(default = "default_char", deserialize_with = "one_or_many")]
+    pub(crate) char: Vec<String>,
+    #[serde(default = "default_user", deserialize_with = "one_or_many")]
+    pub(crate) user: Vec<String>,
+    #[serde(default = "default_them", deserialize_with = "one_or_many")]
+    pub(crate) them: Vec<String>,
+    #[serde(default = "default_their", deserialize_with = "one_or_many")]
+    pub(crate) their: Vec<String>,
+    #[serde(default = "default_self", deserialize_with = "one_or_many")]
+    pub(crate) self_ref: Vec<String>,
 }
 
 impl Default for Persona {
@@ -61,11 +61,17 @@ impl Config {
     }
 
     pub(crate) fn substitute(&self, text: &str) -> String {
-        text.replace("{char}", &self.persona.char)
-            .replace("{user}", &self.persona.user)
-            .replace("{them}", &self.persona.them)
-            .replace("{their}", &self.persona.their)
-            .replace("{self}", &self.persona.self_ref)
+        let mut rng = crate::rng::Rng::new();
+        let char = pick_one(&self.persona.char, "mommy", &mut rng);
+        let user = pick_one(&self.persona.user, "good girl", &mut rng);
+        let them = pick_one(&self.persona.them, "her", &mut rng);
+        let their = pick_one(&self.persona.their, "her", &mut rng);
+        let self_ref = pick_one(&self.persona.self_ref, "herself", &mut rng);
+        text.replace("{char}", &char)
+            .replace("{user}", &user)
+            .replace("{them}", &them)
+            .replace("{their}", &their)
+            .replace("{self}", &self_ref)
     }
 
     pub(crate) fn colorize(&self, text: &str) -> String {
@@ -92,24 +98,52 @@ impl Config {
     }
 }
 
-fn default_char() -> String {
-    "mommy".into()
+fn one_or_many<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum OneOrMany {
+        One(String),
+        Many(Vec<String>),
+    }
+    match OneOrMany::deserialize(deserializer)? {
+        OneOrMany::One(value) => Ok(vec![value]),
+        OneOrMany::Many(values) => Ok(values),
+    }
 }
 
-fn default_user() -> String {
-    "good girl".into()
+fn pick_one(values: &[String], fallback: &str, rng: &mut crate::rng::Rng) -> String {
+    let clean: Vec<&str> = values
+        .iter()
+        .map(String::as_str)
+        .filter(|value| !value.trim().is_empty())
+        .collect();
+    if clean.is_empty() {
+        return fallback.to_owned();
+    }
+    clean[(rng.next_u64() as usize) % clean.len()].to_owned()
 }
 
-fn default_them() -> String {
-    "her".into()
+fn default_char() -> Vec<String> {
+    vec!["mommy".into()]
 }
 
-fn default_their() -> String {
-    "her".into()
+fn default_user() -> Vec<String> {
+    vec!["good girl".into()]
 }
 
-fn default_self() -> String {
-    "herself".into()
+fn default_them() -> Vec<String> {
+    vec!["her".into()]
+}
+
+fn default_their() -> Vec<String> {
+    vec!["her".into()]
+}
+
+fn default_self() -> Vec<String> {
+    vec!["herself".into()]
 }
 
 fn parse_hex(value: &str) -> Option<(u8, u8, u8)> {

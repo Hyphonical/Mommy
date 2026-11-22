@@ -76,6 +76,28 @@ $env.config.hooks.pre_prompt = [{ || mommy -- nu -c $"exit ($env.LAST_EXIT_CODE)
 function prompt { $c = $LASTEXITCODE; mommy -- cmd /c "exit $c"; "PS $($executionContext.SessionState.Path.CurrentLocation)> " }
 ```
 
+## Configuration
+
+Config lives at `~/.mommy/config.toml`, or at the path in `$MOMMY_CONFIG` if set.
+
+Persona names (`char`, `user`, `them`, `their`, `self`) can be a single name or a list. One name is picked at random each time, and that same pick is used in the whole message. An empty list uses the default.
+
+```toml
+[persona]
+user = ["honey", "baby", "sweetie"]
+# or a single name
+# user = "sweetie"
+```
+
+Defaults are `mommy`, `good girl`, `her`, `her` and `herself`.
+
+`style.color` takes a hex colour with a hash, like `"#ff99cc"`. It colours the output only if your terminal supports colour, and is turned off if `NO_COLOR` is set. A bad colour prints a warning and falls back to plain text.
+
+```toml
+[style]
+color = "#ff99cc"
+```
+
 ## Single-binary build (`embed` feature)
 
 If you want a completely self-contained executable with no first-run download, place the quantized weights at `model/model.bpk` and enable the `embed` feature:
