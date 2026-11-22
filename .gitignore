@@ -1,0 +1,22 @@
+# Rust build output
+/target/
+
+# Large model weights
+/model/*.safetensors
+/model/*.bpk
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Editors and OS files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

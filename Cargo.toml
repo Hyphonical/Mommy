@@ -1,0 +1,51 @@
+[package]
+name = "mommy"
+version = "0.2.0"
+edition = "2024"
+description = "A tiny, pure-Rust embedded language model for shell prompt encouragement and compliments"
+license = "AGPL-3.0-only"
+repository = "https://github.com/Hyphonical/Mommy"
+keywords = ["shell", "prompt", "encouragement", "compliments", "cli"]
+categories = ["command-line-utilities"]
+exclude = [".github/", "/model/*.bpk", "/model/*.safetensors"]
+
+[dependencies]
+anyhow = "1"
+burn = { version = "0.22.1", default-features = false, features = ["flex", "store", "safetensors", "simd", "rayon"] }
+burn-store = "0.22.1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokenizers = { version = "0.22", default-features = false, features = ["fancy-regex"] }
+ureq = "3"
+
+[features]
+embed = []
+
+[lints.cargo]
+unused_dependencies = "allow"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+needless_pass_by_value = "warn"
+explicit_iter_loop = "warn"
+manual_let_else = "warn"
+cloned_instead_of_copied = "warn"
+redundant_closure_for_method_calls = "warn"
+semicolon_if_nothing_returned = "warn"
+match_same_arms = "warn"
+unnested_or_patterns = "warn"
+unwrap_used = "warn"
+expect_used = "warn"
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+
+[lints.rust]
+unreachable_pub = "warn"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 8
+strip = true
+panic = "abort"
