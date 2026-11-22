@@ -1,6 +1,7 @@
+mod chat;
+mod config;
 #[cfg(not(feature = "embed"))]
 mod fetch;
-mod chat;
 mod model {
     pub(crate) mod qwen3;
 }
@@ -197,7 +198,8 @@ fn respond(
     };
     match generate(&model, &tokenizer, device, input) {
         Ok(text) if !text.is_empty() => {
-            eprintln!("{text}");
+            let config = config::Config::load();
+            eprintln!("{}", config.colorize(&config.substitute(&text)));
             let _ = io::stderr().flush();
         }
         Ok(_) => {}
@@ -439,7 +441,11 @@ fn home_dir() -> Option<std::path::PathBuf> {
     env::var("HOME")
         .ok()
         .filter(|value| !value.is_empty())
-        .or_else(|| env::var("USERPROFILE").ok().filter(|value| !value.is_empty()))
+        .or_else(|| {
+            env::var("USERPROFILE")
+                .ok()
+                .filter(|value| !value.is_empty())
+        })
         .map(std::path::PathBuf::from)
 }
 

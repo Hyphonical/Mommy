@@ -20,9 +20,8 @@ pub(crate) fn ensure_model_bpk(existing: &Path, dir: &Path) -> anyhow::Result<Pa
 
     eprintln!("mommy: downloading model (~128 MB) to {}", target.display());
 
-    fs::create_dir_all(dir).map_err(|error| {
-        anyhow::anyhow!("failed to create {}: {error}", dir.display())
-    })?;
+    fs::create_dir_all(dir)
+        .map_err(|error| anyhow::anyhow!("failed to create {}: {error}", dir.display()))?;
 
     let tmp = dir.join("model.bpk.part");
     let _ = fs::remove_file(&tmp);

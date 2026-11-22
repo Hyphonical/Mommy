@@ -51,7 +51,6 @@ struct RawConfig {
 }
 
 impl Qwen3Config {
-
     pub(crate) fn parse(raw: &str) -> anyhow::Result<Self> {
         let raw: RawConfig = serde_json::from_str(raw)?;
 
